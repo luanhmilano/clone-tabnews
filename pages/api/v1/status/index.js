@@ -3,8 +3,8 @@ import database from "infra/database.js";
 export default async function status(request, response) {
   const updatedAt = new Date().toISOString();
 
-  const dbVersionResponse = await database.query("SELECT version();");
-  const dbVersion = dbVersionResponse.rows[0].version;
+  const dbVersionResponse = await database.query("SHOW server_version;");
+  const dbVersion = dbVersionResponse.rows[0].server_version;
 
   const dbMaxConnections = await database.query("SHOW max_connections;");
   const maxConnections = Number.parseInt(
@@ -20,7 +20,11 @@ export default async function status(request, response) {
 
   response.status(200).json({
     updated_at: updatedAt,
-    version: dbVersion,
+    dependencies: {
+      database: {
+        version: dbVersion,
+      },
+    },
     max_connections: maxConnections,
     opened_connections: openedConnections,
   });
